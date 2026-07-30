@@ -1,3 +1,4 @@
+from app.services.ai_pipeline import process_event
 from datetime import datetime
 
 from sqlalchemy.orm import Session
@@ -70,7 +71,19 @@ def store_news_events(db: Session):
 
     for article in articles:
         event = normalize_news_event(article)
-        saved_event = save_normalized_event(db, event.model_dump())
+
+        # Save Event
+        saved_event = save_normalized_event(
+            db,
+            event.model_dump(),
+        )
+
+        # Automatically run AI Pipeline
+        process_event(
+            db=db,
+            event=saved_event,
+        )
+
         saved_events.append(saved_event)
 
     logger.info(f"{len(saved_events)} news events processed.")
@@ -79,7 +92,6 @@ def store_news_events(db: Session):
         "message": f"{len(saved_events)} news events processed successfully.",
         "events": saved_events,
     }
-
 
 # --------------------------------------------------
 # STORE WEATHER EVENT
@@ -94,7 +106,18 @@ def store_weather_event(db: Session):
         return weather
 
     event = normalize_weather_event(weather)
-    saved_event = save_normalized_event(db, event.model_dump())
+
+    # Save Event
+    saved_event = save_normalized_event(
+        db,
+        event.model_dump(),
+    )
+
+    # Automatically run AI Pipeline
+    process_event(
+        db=db,
+        event=saved_event,
+    )
 
     logger.info("Weather event processed successfully.")
 
@@ -102,7 +125,6 @@ def store_weather_event(db: Session):
         "message": "Weather event processed successfully.",
         "event": saved_event,
     }
-
 
 # --------------------------------------------------
 # SCHEDULER FUNCTION

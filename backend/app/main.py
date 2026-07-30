@@ -10,6 +10,7 @@ from app.routers import (
     risk,
     prediction,
     recommendation,
+    correlation,
     ai_log,
     system_log,
 )
@@ -30,6 +31,7 @@ app.include_router(event.router)
 app.include_router(risk.router)
 app.include_router(prediction.router)
 app.include_router(recommendation.router)
+app.include_router(correlation.router)
 app.include_router(ai_log.router)
 app.include_router(system_log.router)
 

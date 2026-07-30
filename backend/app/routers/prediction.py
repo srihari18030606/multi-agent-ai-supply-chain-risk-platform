@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
+
 from app.crud.prediction import (
     create_prediction,
     get_prediction,
@@ -9,16 +10,17 @@ from app.crud.prediction import (
     update_prediction,
     delete_prediction,
 )
+
+from app.crud.event import get_event
+
 from app.schemas.prediction import (
     PredictionCreate,
     PredictionUpdate,
     PredictionResponse,
 )
 
-from app.ai.inference import predict_event
-from app.crud.event import get_event
-from app.crud.risk import get_risk_by_event
-from app.schemas.prediction import PredictionCreate
+from app.services.ai_pipeline import process_event
+
 
 router = APIRouter(
     prefix="/predictions",
@@ -35,7 +37,9 @@ def create_new_prediction(
 
 
 @router.get("/", response_model=list[PredictionResponse])
-def read_predictions(db: Session = Depends(get_db)):
+def read_predictions(
+    db: Session = Depends(get_db),
+):
     return get_predictions(db)
 
 
@@ -49,7 +53,7 @@ def read_prediction(
     if not prediction:
         raise HTTPException(
             status_code=404,
-            detail="Prediction not found"
+            detail="Prediction not found",
         )
 
     return prediction
@@ -70,7 +74,7 @@ def update_existing_prediction(
     if not updated_prediction:
         raise HTTPException(
             status_code=404,
-            detail="Prediction not found"
+            detail="Prediction not found",
         )
 
     return updated_prediction
@@ -89,58 +93,48 @@ def delete_existing_prediction(
     if not deleted_prediction:
         raise HTTPException(
             status_code=404,
-            detail="Prediction not found"
+            detail="Prediction not found",
         )
 
-    return {"message": "Prediction deleted successfully"}
+    return {
+        "message": "Prediction deleted successfully"
+    }
 
-#Integrate AI into existing router
-    
+
+# -------------------------------
+# AI Pipeline Endpoint
+# -------------------------------
+
 @router.post("/predict/{event_id}")
 def predict_event_risk(
     event_id: int,
     db: Session = Depends(get_db),
 ):
     # Fetch Event
-    event = get_event(db, event_id)
+    event = get_event(
+        db,
+        event_id,
+    )
 
     if not event:
         raise HTTPException(
             status_code=404,
-            detail="Event not found"
+            detail="Event not found",
         )
 
-    # Fetch Risk
-    risk = get_risk_by_event(db, event_id)
+    try:
+        result = process_event(
+            db=db,
+            event=event,
+        )
 
-    if not risk:
+        return {
+            "message": "AI pipeline executed successfully",
+            "result": result,
+        }
+
+    except Exception as e:
         raise HTTPException(
-            status_code=404,
-            detail="Risk not found for this event"
+            status_code=500,
+            detail=str(e),
         )
-
-    # Run AI
-    result = predict_event(
-        event.description,
-        event.location,
-    )
-
-    # Save Prediction
-    prediction = PredictionCreate(
-        predicted_risk=result["category"],
-        predicted_severity=result["severity"],
-        confidence_score=result["confidence"],
-        prediction_model="DistilBERT + XGBoost",
-        prediction_status="Generated",
-        risk_id=risk.id,
-    )
-
-    saved_prediction = create_prediction(
-        db,
-        prediction,
-    )
-
-    return {
-        "message": "Prediction generated successfully",
-        "prediction": saved_prediction,
-    }

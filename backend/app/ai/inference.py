@@ -196,13 +196,22 @@ def predict_severity(
         [event_description]
     )
 
+    # Encode category
     category_value = category_encoder.transform(
         [category]
     )[0]
 
+    # Encode location safely
+    if location not in location_encoder.classes_:
+        location = location_encoder.classes_[0]
+
     location_value = location_encoder.transform(
         [location]
     )[0]
+
+    # Encode industry safely
+    if industry not in industry_encoder.classes_:
+        industry = industry_encoder.classes_[0]
 
     industry_value = industry_encoder.transform(
         [industry]
@@ -226,7 +235,6 @@ def predict_severity(
     )[0]
 
     return severity
-
 
 # --------------------------------------------------
 # Complete AI Prediction Pipeline
