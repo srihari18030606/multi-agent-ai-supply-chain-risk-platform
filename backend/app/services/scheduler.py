@@ -13,7 +13,7 @@ def start_scheduler():
         scheduler.add_job(
             collect_news_events,
             trigger="interval",
-            minutes=settings.SCHEDULER_INTERVAL_MINUTES,
+            minutes=settings.SCHEDULER_INTERVAL_SECONDS,
             id="news_collection",
             replace_existing=True,
         )
@@ -21,7 +21,7 @@ def start_scheduler():
         scheduler.start()
 
         logger.info(
-            f"Scheduler started successfully. Interval: {settings.SCHEDULER_INTERVAL_MINUTES} minute(s)."
+            f"Scheduler started successfully. Interval: {settings.SCHEDULER_INTERVAL_SECONDS} second(s)."
         )
 
 

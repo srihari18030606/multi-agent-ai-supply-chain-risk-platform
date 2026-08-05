@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # -----------------------------------------
     # Scheduler
     # -----------------------------------------
-    SCHEDULER_INTERVAL_MINUTES: int = 30
+    SCHEDULER_INTERVAL_SECONDS: int = 30
 
     model_config = SettingsConfigDict(
         env_file=".env",

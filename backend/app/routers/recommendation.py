@@ -15,6 +15,15 @@ from app.schemas.recommendation import (
     RecommendationResponse,
 )
 
+from app.crud.recommendation import (
+    create_recommendation,
+    get_recommendation,
+    get_recommendations,
+    get_recommendation_by_prediction,
+    update_recommendation,
+    delete_recommendation,
+)
+
 router = APIRouter(
     prefix="/recommendations",
     tags=["Recommendations"]
@@ -33,6 +42,26 @@ def create_new_recommendation(
 def read_recommendations(db: Session = Depends(get_db)):
     return get_recommendations(db)
 
+@router.get(
+    "/prediction/{prediction_id}",
+    response_model=RecommendationResponse,
+)
+def read_recommendation_by_prediction(
+    prediction_id: int,
+    db: Session = Depends(get_db),
+):
+    recommendation = get_recommendation_by_prediction(
+        db,
+        prediction_id,
+    )
+
+    if not recommendation:
+        raise HTTPException(
+            status_code=404,
+            detail="Recommendation not found",
+        )
+
+    return recommendation
 
 @router.get("/{recommendation_id}", response_model=RecommendationResponse)
 def read_recommendation(

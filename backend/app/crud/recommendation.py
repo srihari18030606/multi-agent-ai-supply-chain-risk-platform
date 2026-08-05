@@ -19,6 +19,15 @@ def get_recommendation(db: Session, recommendation_id: int):
         .first()
     )
 
+def get_recommendation_by_prediction(
+    db: Session,
+    prediction_id: int,
+    ):
+    return (
+        db.query(Recommendation)
+        .filter(Recommendation.prediction_id == prediction_id)
+        .first()
+    )
 
 def get_recommendations(db: Session):
     return db.query(Recommendation).all()
