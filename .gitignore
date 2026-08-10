@@ -24,3 +24,18 @@ backend/models/risk_classifier/checkpoint-*/
 
 *.pt
 *.pth
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# AI training checkpoints
+backend/models/risk_classifier/checkpoint-*/
+backend/models/**/checkpoint-*/
+**/optimizer.pt
+
+# Training artifacts
+*.ckpt
