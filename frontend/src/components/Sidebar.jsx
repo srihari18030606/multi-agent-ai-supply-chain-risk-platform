@@ -24,7 +24,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <div className="hidden border-r bg-card md:block w-64 flex-shrink-0 min-h-screen flex-col">
+    <div className="hidden border-r bg-sidebar md:block w-64 flex-shrink-0 min-h-screen flex-col">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <NavLink to="/" className="flex items-center gap-2 font-semibold text-lg text-primary">
           <BrainCircuit className="h-6 w-6" />
@@ -39,8 +39,8 @@ export function Sidebar() {
               to={item.href}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                  isActive ? "bg-muted text-primary font-semibold" : ""
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-nav-hover hover:text-primary",
+                  isActive ? "bg-nav-active text-primary font-semibold" : ""
                 )
               }
             >

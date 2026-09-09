@@ -29,8 +29,19 @@ const fetchEventDetails = async (id) => {
   // Find associated risks for this event
   const relatedRisks = risksRes.data.filter(r => r.event_id === parseInt(id));
   
+  const highestSeverityRisk = relatedRisks.length > 0 
+    ? relatedRisks.reduce((prev, current) => {
+        const scores = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+        const prevScore = scores[prev.severity?.toLowerCase()] || 0;
+        const currScore = scores[current.severity?.toLowerCase()] || 0;
+        return currScore > prevScore ? current : prev;
+      })
+    : null;
+  
   return {
     ...event,
+    displaySeverity: highestSeverityRisk?.severity || 'Unknown',
+    displayLocation: (!event.location || event.location.toLowerCase() === 'unknown') ? 'Not specified' : event.location,
     relatedRisks
   };
 };
@@ -87,12 +98,12 @@ export default function EventDetails() {
                     ) : (
                       <>
                         <span className="flex items-center gap-1"><Activity className="h-4 w-4" /> {event?.event_type}</span>
-                        <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {event?.location || 'Unknown'}</span>
+                        <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {event?.displayLocation}</span>
                       </>
                     )}
                   </CardDescription>
                 </div>
-                {!isLoading && <SeverityBadge severity={event?.severity} />}
+                {!isLoading && <SeverityBadge severity={event?.displaySeverity} />}
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -197,7 +208,7 @@ export default function EventDetails() {
                     />
                     <Marker position={[event.latitude, event.longitude]}>
                       <Popup>
-                        {event.location || event.title}
+                        {event.displayLocation !== 'Not specified' ? event.displayLocation : event.title}
                       </Popup>
                     </Marker>
                   </MapContainer>
