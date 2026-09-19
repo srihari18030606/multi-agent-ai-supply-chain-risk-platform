@@ -39,3 +39,9 @@ backend/models/**/checkpoint-*/
 
 # Training artifacts
 *.ckpt
+# Trained AI models - stored separately on Google Drive
+backend/models/
+
+# Local SQLite database
+backend/supply_chain.db
+
